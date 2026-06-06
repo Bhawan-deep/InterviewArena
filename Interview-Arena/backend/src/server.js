@@ -40,10 +40,32 @@ io.on("connection", (socket) => {
    );
 });
  socket.on("chat-message", (data) => {
-
    io.to(data.roomCode).emit(
       "receive-message",
-      data.message
+      {
+         sender: data.sender,
+         message: data.message
+      }
+   );
+
+});
+  socket.on("offer",(offer)=>{
+    console.log(`offer recieved from ${socket.id}`);
+    socket.broadcast.emit("offer",offer);
+    console.log(`offer emitted`);
+    
+  })
+  socket.on("answer",(answer)=>{
+    socket.broadcast.emit("answer",answer);
+  })
+   socket.on("ice-candidate",(candidate)=>{
+    socket.broadcast.emit("ice-candidate",candidate);
+   });
+   socket.on("code-change", (code) => {
+
+   socket.broadcast.emit(
+      "code-change",
+      code
    );
 
 });
