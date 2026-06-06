@@ -1,17 +1,13 @@
-import './App.css';
 import { io } from "socket.io-client";
 import { useEffect,useState,useRef } from "react";
 
 
-import CodeEditorDemo from "./components/CodeEditorDemo";
+
+
 
 const socket = io("http://localhost:5000");
 
 function App() {
-   const [code,setCode] = useState(
-  'console.log("Hello World");'
-);
-   const messagesEndRef = useRef(null);
 const [typedMessage, setTypedMessage] = useState("");
 const [allMessages, setAllMessages] = useState([]);
 const myCameraVideoTag=useRef(null);
@@ -21,31 +17,15 @@ const remoteVideoTag=useRef(null);
 
 
 const sendMessage = () => {
-    if (!typedMessage.trim()) {
-      return;
-   }
    socket.emit(
-   "chat-message",
-   {
-      roomCode: "fd-DOG",
-      sender: "Bhawandeep",
-      message: typedMessage
-   }
-);
- setTypedMessage("");
-
-}
-useEffect(()=>{
-   socket.emit(
-      "code-change",
-      code
+      "chat-message",
+      {
+         roomCode: "fd-DOG",
+         message: typedMessage
+      }
    );
-},[code]);
-useEffect(() => {
-  messagesEndRef.current?.scrollIntoView({
-    behavior: "smooth"
-  });
-}, [allMessages]);
+   setTypedMessage("");
+};
 
   useEffect(() => {  
 //sockets of sender;
@@ -171,102 +151,42 @@ socket.on("ice-candidate",async (candidate)=>{
    console.log("added ice")
 
 })
-socket.on(
-   "code-change",
-   (incomingCode) => {
-
-      setCode(
-         incomingCode
-      );
-
-   }
-);
 
 }, []);
 
   return (
-   
-   <div className="app-container">
-
-    <div className="editor-section">
-   <h2>Interview Arena</h2>
-
-  <CodeEditorDemo
-   code={code}
-   setCode={setCode}
-/>
-</div>
-
-    <div className="right-section">
-
-     <div className="remote-video-container">
-
-  <video
-    ref={remoteVideoTag}
-    autoPlay
-    playsInline
-  />
-
-  <div className="local-video-container">
-    <video
-      ref={myCameraVideoTag}
-      autoPlay
-      playsInline
-      muted
+    <>
+     <h1>Interview Arena</h1>
+    <input value={typedMessage} 
+    onChange={(e)=>{
+      setTypedMessage(e.target.value);
+    }} 
     />
-  </div>
-
-</div>
-
-     <div className="chat-container">
-<div className="messages-container">
-
-  {allMessages.map((singlemsg,index)=>(
-  <div
-    className="message"
-    key={index}
-  >
-    <strong>
-      {singlemsg.sender}
-    </strong>
-    : {singlemsg.message}
-  </div>
-))}
-
-  <div ref={messagesEndRef}></div>
-
-</div>
-
-  <div className="chat-input-container">
-
-    <input
-  value={typedMessage}
-  onChange={(e) => setTypedMessage(e.target.value)}
-  onKeyDown={(e) => {
-    if (
-      e.key === "Enter" &&
-      typedMessage.trim()
-   ) {
-      sendMessage();
-   }
-  }}
+   <button
+   onClick={sendMessage}
+>
+   Send
+</button>
+{
+  allMessages.map((singlemsg,index)=>{
+    return (
+      <p key={index}>{singlemsg}</p>
+    )
+  })
+}
+<video
+  ref={myCameraVideoTag}
+  autoPlay
+  playsInline
 />
+<video
+   ref={remoteVideoTag}
+   autoPlay
+   playsInline
+/>
+    </>
+   
+  );
+}
 
-    <button
-    
-      onClick={sendMessage}
-    >
-      Send
-    </button>
-
-  </div>
-
-</div>
-
-    </div>
-
-  </div>
-
-  
-)};
 export default App;
