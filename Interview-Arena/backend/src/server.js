@@ -67,8 +67,19 @@ io.on("connection", (socket) => {
       "code-change",
       code
    );
-
 });
+socket.on(
+   "language-change",
+   (language)=>{
+
+      socket.broadcast.emit(
+         "language-change",
+         language
+      );
+
+   }
+);
+
 
   socket.on("disconnect", () => {
     console.log("User Disconnected:", socket.id);
