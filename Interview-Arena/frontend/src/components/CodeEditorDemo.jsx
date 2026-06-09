@@ -3,20 +3,42 @@ import { useState } from "react";
 
 function CodeEditorDemo({
    code,
-   setCode
+   selectedLanguage,setCodes,socket
 }) {
+   
+   
+   
 
 
    return (
+      
       <Editor
          height="500px"
-         defaultLanguage="javascript"
+         language={selectedLanguage}
          value={code}
          options={{
      wordWrap:"on"
   }}
-         onChange={(value)=>{
-   setCode(value);
+    onChange={(value)=>{
+
+   const newCode = value || "";
+
+   setCodes((prevCodes)=>({
+
+      ...prevCodes,
+
+      [selectedLanguage]: newCode
+
+   }));
+
+   socket.emit(
+      "code-change",
+      {
+         language: selectedLanguage,
+         code: newCode
+      }
+   );
+
 }}
       />
    );

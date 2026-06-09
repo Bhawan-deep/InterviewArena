@@ -8,9 +8,63 @@ import CodeEditorDemo from "./components/CodeEditorDemo";
 const socket = io("http://localhost:5000");
 
 function App() {
-   const [code,setCode] = useState(
-  'console.log("Hello World");'
-);
+const [selectedLanguage,setSelectedLanguage]=useState("javascript");
+const [codes,setCodes] = useState({
+
+   javascript:
+      'console.log("Hello World");',
+
+   python:
+      'print("Hello World")',
+
+   java:
+`public class Main {
+
+   public static void main(String[] args){
+
+   }
+
+}`,
+
+   cpp:
+`#include <iostream>
+
+using namespace std;
+
+int main(){
+
+   return 0;
+
+}`
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    const messagesEndRef = useRef(null);
 const [typedMessage, setTypedMessage] = useState("");
 const [allMessages, setAllMessages] = useState([]);
@@ -35,12 +89,7 @@ const sendMessage = () => {
  setTypedMessage("");
 
 }
-useEffect(()=>{
-   socket.emit(
-      "code-change",
-      code
-   );
-},[code]);
+
 useEffect(() => {
   messagesEndRef.current?.scrollIntoView({
     behavior: "smooth"
@@ -173,10 +222,25 @@ socket.on("ice-candidate",async (candidate)=>{
 })
 socket.on(
    "code-change",
-   (incomingCode) => {
+   (data)=>{
 
-      setCode(
-         incomingCode
+      setCodes((prev)=>({
+
+         ...prev,
+
+         [data.language]:
+            data.code
+
+      }));
+
+   }
+);
+socket.on(
+   "language-change",
+   (incomingLanguage)=>{
+
+      setSelectedLanguage(
+         incomingLanguage
       );
 
    }
@@ -184,17 +248,77 @@ socket.on(
 
 }, []);
 
+
   return (
    
    <div className="app-container">
 
     <div className="editor-section">
    <h2>Interview Arena</h2>
+<select value={selectedLanguage}
+onChange={(e)=>{
+   const newLanguage = e.target.value;
 
+setSelectedLanguage(newLanguage);
+
+socket.emit(
+   "language-change",
+   newLanguage
+);
+}}>
+<option value="javascript">
+      JavaScript
+   </option>
+
+   <option value="java">
+      Java
+   </option>
+
+   <option value="python">
+      Python
+   </option>
+
+   <option value="cpp">
+      C++
+   </option>
+</select>
   <CodeEditorDemo
-   code={code}
-   setCode={setCode}
+   code={codes[selectedLanguage]}
+  selectedLanguage={selectedLanguage}
+   setCodes={setCodes}
+   socket={socket}
 />
+<div className="execution-panel">
+
+   <button className="run-btn">
+      Run Code
+   </button>
+
+   <div className="input-output-container">
+
+      <div className="input-box">
+
+         <h3>Input</h3>
+
+         <textarea
+            placeholder="Custom input..."
+         />
+
+      </div>
+
+      <div className="output-box">
+
+         <h3>Output</h3>
+
+         <pre>
+            Output will appear here...
+         </pre>
+
+      </div>
+
+   </div>
+
+</div>
 </div>
 
     <div className="right-section">
