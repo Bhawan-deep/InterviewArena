@@ -1,7 +1,7 @@
 import './App.css';
 import { io } from "socket.io-client";
 import { useEffect,useState,useRef } from "react";
-
+import axios from "axios";
 
 import CodeEditorDemo from "./components/CodeEditorDemo";
 
@@ -37,14 +37,41 @@ int main(){
 
 }`
 });
+const [input, setInput] = useState("");
+const [output, setOutput] = useState("");
+
+const runCode = async () => {
+
+   try {
+
+      const response = await axios.post(
+         "http://localhost:5000/api/run-code",
+         {
+            code: codes[selectedLanguage],
+            language: selectedLanguage,
+            input: input
+         }
+      );
+
+    const finalOutput =
+   response.data.stderr ||
+   response.data.stdout;
+
+setOutput(finalOutput);
+
+socket.emit(
+   "output-change",
+   finalOutput
+);
 
 
+   } catch (err) {
 
+      console.log(err);
 
+   }
 
-
-
-
+};
 
 
 
@@ -245,6 +272,14 @@ socket.on(
 
    }
 );
+socket.on(
+   "output-change",
+   (output) => {
+
+      setOutput(output);
+
+   }
+);
 
 }, []);
 
@@ -290,7 +325,9 @@ socket.emit(
 />
 <div className="execution-panel">
 
-   <button className="run-btn">
+
+
+   <button className="run-btn" onClick={runCode}>
       Run Code
    </button>
 
@@ -301,6 +338,10 @@ socket.emit(
          <h3>Input</h3>
 
          <textarea
+            value={input}
+            onChange={(e)=>{
+               setInput(e.target.value)
+            }}
             placeholder="Custom input..."
          />
 
@@ -311,7 +352,7 @@ socket.emit(
          <h3>Output</h3>
 
          <pre>
-            Output will appear here...
+             {output}
          </pre>
 
       </div>
