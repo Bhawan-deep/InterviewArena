@@ -79,6 +79,18 @@ socket.on(
 
    }
 );
+socket.on(
+   "output-change",
+   (output) => {
+
+      socket.broadcast.emit(
+         "output-change",
+         output
+      );
+
+   }
+);
+
 
 
   socket.on("disconnect", () => {
